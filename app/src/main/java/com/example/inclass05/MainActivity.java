@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,10 +28,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PhotoLink.PhotoData {
 
     TextView keywordHolder;
-    ListView listview;
+    ArrayList<String>photoList;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         keywordHolder = findViewById(R.id.keywordHolder);
-        listview = findViewById(R.id.listview);
+       progressBar = findViewById(R.id.progressBar);
 
         findViewById(R.id.buttongo).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     private boolean isConnected() {
@@ -99,8 +102,8 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-            }
-            return result;
+
+            }   return result;
         }
 
         @Override
@@ -111,8 +114,6 @@ public class MainActivity extends AppCompatActivity {
             for (int x = 0; x<stringArray.length; x++) {
                 str.add(stringArray[x]);
             }
-
-
             final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setTitle("Pick one")
                         .setItems(stringArray, new DialogInterface.OnClickListener() {
@@ -120,12 +121,20 @@ public class MainActivity extends AppCompatActivity {
                                 str.get(i);
                                 TextView k = findViewById(R.id.keywordHolder);
                                 k.setText(str.get(i));
-                                new PhotoLinks().execute(" http://dev.theappsdr.com/apis/photos/index.php?keyword=");
-//                                new getImages((ImageView) findViewById(R.id.photoDisplay)).execute(photoLinks.get(0));
+                                new PhotoLink(MainActivity.this).execute("http://dev.theappsdr.com/apis/photos/index.php?keyword=" + str.get(i));
                             }
                         });
+
                 builder.create().show();
+
         }
     }
 
+    @Override
+    public void handlePhotoData(ArrayList<String> arrayList) {
+        this.photoList = arrayList;
+        progressBar.setVisibility(View.INVISIBLE);
+        new GetImage((ImageView)findViewById(R.id.imageView)).execute(photoList.get(0));
+
+    }
 }
