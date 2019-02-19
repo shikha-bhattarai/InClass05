@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">InClass05</string>
+    <string name="GO">buttongo</string>
+    <string name="buttongo">GO</string>
+    <string name="Previous">previousBtn</string>
+    <string name="Search">Search</string>
+</resources>
