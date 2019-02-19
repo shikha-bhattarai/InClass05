@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -119,9 +120,10 @@ public class MainActivity extends AppCompatActivity {
                                 str.get(i);
                                 TextView k = findViewById(R.id.keywordHolder);
                                 k.setText(str.get(i));
+                                new PhotoLinks().execute(" http://dev.theappsdr.com/apis/photos/index.php?keyword=");
+//                                new getImages((ImageView) findViewById(R.id.photoDisplay)).execute(photoLinks.get(0));
                             }
                         });
-
                 builder.create().show();
 
         }
