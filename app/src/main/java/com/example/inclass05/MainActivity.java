@@ -111,14 +111,19 @@ public class MainActivity extends AppCompatActivity {
                 str.add(stringArray[x]);
             }
 
+
             final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setTitle("Pick one")
                         .setItems(stringArray, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int i) {
                                 str.get(i);
+                                TextView k = findViewById(R.id.keywordHolder);
+                                k.setText(str.get(i));
                             }
                         });
+
                 builder.create().show();
+
         }
     }
 
