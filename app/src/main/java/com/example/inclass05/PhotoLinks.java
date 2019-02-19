@@ -1,6 +1,7 @@
 package com.example.inclass05;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
@@ -11,30 +12,21 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class PhotoLinks extends AsyncTask<String, Void, String> {
+public class PhotoLinks extends AsyncTask<String, Void, Bitmap> {
     ImageView imageView;
     Bitmap bitmap = null;
 
     @Override
-    protected String doInBackground(String... params) {
-        StringBuilder stringBuilder = new StringBuilder();
+    protected Bitmap doInBackground(String... params) {
         HttpURLConnection connection = null;
-        BufferedReader reader = null;
-        String result = null;
+       Bitmap image = null;
         try {
-
             URL url = new URL(params[0]);
             connection = (HttpURLConnection) url.openConnection();
             connection.connect();
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line = "";
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line);
-                }
-                result = stringBuilder.toString();
+                image = BitmapFactory.decodeStream(connection.getInputStream());
             }
-
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -43,16 +35,12 @@ public class PhotoLinks extends AsyncTask<String, Void, String> {
             if (connection != null) {
                 connection.disconnect();
             }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
-        return result;
+        return image;
     }
-
-
+    protected void onPostExecute(Bitmap bitmap){
+        if (bitmap != null && imageView != null){
+            imageView.setImageBitmap(bitmap);
+        }
+    }
 }
