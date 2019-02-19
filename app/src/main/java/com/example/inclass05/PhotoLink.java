@@ -63,7 +63,8 @@ public class PhotoLink extends AsyncTask<String, Void, ArrayList> {
                 }
             }
 
-        }   return result;
+        }
+    return result;
     }
 
     @Override

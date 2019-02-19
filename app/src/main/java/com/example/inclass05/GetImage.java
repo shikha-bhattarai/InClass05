@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,9 +17,11 @@ import java.net.URL;
 
 public class GetImage extends AsyncTask<String, Void, Bitmap> {
     ImageView imageView;
+    ProgressBar progressBar;
 
-    public GetImage(ImageView imageView) {
+    public GetImage(ImageView imageView, ProgressBar progressBar) {
         this.imageView = imageView;
+        this.progressBar = progressBar;
     }
 
     @Override
@@ -45,6 +48,7 @@ public class GetImage extends AsyncTask<String, Void, Bitmap> {
         return image;
     }
     protected void onPostExecute(Bitmap bitmap){
+        progressBar.setVisibility(View.INVISIBLE);
         imageView.setVisibility(View.VISIBLE);
 
         if (bitmap != null && imageView != null){

@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -31,8 +32,12 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements PhotoLink.PhotoData {
 
     TextView keywordHolder;
-    ArrayList<String>photoList;
+    ArrayList<String> photoList;
     ProgressBar progressBar;
+    ImageView leftArrow;
+    ImageView rightArrow;
+    ImageView imageView;
+    int currentPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,16 +45,47 @@ public class MainActivity extends AppCompatActivity implements PhotoLink.PhotoDa
         setContentView(R.layout.activity_main);
 
         keywordHolder = findViewById(R.id.keywordHolder);
-       progressBar = findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progressBar);
+        leftArrow = findViewById(R.id.leftArrow);
+        rightArrow = findViewById(R.id.rightArrow);
+        imageView = findViewById(R.id.imageView);
+        leftArrow.setEnabled(false);
+        rightArrow.setEnabled(false);
 
         findViewById(R.id.buttongo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (isConnected()) {
+                    imageView.setVisibility(View.INVISIBLE);
+                    progressBar.setVisibility(View.VISIBLE);
                     new GetDataAsync().execute("http://dev.theappsdr.com/apis/photos/keywords.php");
                 } else {
                     Toast.makeText(MainActivity.this, "Internet is Not Connected", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        leftArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                imageView.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
+
+
+                if (currentPosition == 0) {
+                    showImage(photoList.get(photoList.size() - 1));
+                } else showImage(photoList.get(currentPosition - 1));
+            }
+        });
+
+        rightArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                imageView.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
+                if (currentPosition == photoList.size() - 1) {
+                    showImage(photoList.get(0));
+                } else showImage(photoList.get(currentPosition + 1));
             }
         });
 
@@ -103,29 +139,27 @@ public class MainActivity extends AppCompatActivity implements PhotoLink.PhotoDa
                     }
                 }
 
-            }   return result;
+            }
+            return result;
         }
 
         @Override
         protected void onPostExecute(final String s) {
             final String[] stringArray = s.split(";");
 
-            final ArrayList<String>str = new ArrayList<>();
-            for (int x = 0; x<stringArray.length; x++) {
-                str.add(stringArray[x]);
-            }
+            final ArrayList<String> str = new ArrayList<>();
+            str.addAll(Arrays.asList(stringArray));
             final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("Pick one")
-                        .setItems(stringArray, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int i) {
-                                str.get(i);
-                                TextView k = findViewById(R.id.keywordHolder);
-                                k.setText(str.get(i));
-                                new PhotoLink(MainActivity.this).execute("http://dev.theappsdr.com/apis/photos/index.php?keyword=" + str.get(i));
-                            }
-                        });
+            builder.setTitle("Pick one")
+                    .setItems(stringArray, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int i) {
+                            TextView k = findViewById(R.id.keywordHolder);
+                            k.setText(str.get(i));
+                            new PhotoLink(MainActivity.this).execute("http://dev.theappsdr.com/apis/photos/index.php?keyword=" + str.get(i));
+                        }
+                    });
 
-                builder.create().show();
+            builder.create().show();
 
         }
     }
@@ -133,8 +167,23 @@ public class MainActivity extends AppCompatActivity implements PhotoLink.PhotoDa
     @Override
     public void handlePhotoData(ArrayList<String> arrayList) {
         this.photoList = arrayList;
-        progressBar.setVisibility(View.INVISIBLE);
-        new GetImage((ImageView)findViewById(R.id.imageView)).execute(photoList.get(0));
 
+        if (arrayList.size() == 1 || arrayList.isEmpty()) {
+            leftArrow.setEnabled(false);
+            rightArrow.setEnabled(false);
+            imageView.setImageResource(android.R.color.transparent);
+            Toast toast = Toast.makeText(getApplicationContext(), "No Image Found", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+        } else {
+            leftArrow.setEnabled(true);
+            rightArrow.setEnabled(true);
+        }
+        showImage(photoList.get(0));
+    }
+
+    public void showImage(String a) {
+        new GetImage((ImageView) findViewById(R.id.imageView), progressBar).execute(a);
+        currentPosition = photoList.indexOf(a);
     }
 }
